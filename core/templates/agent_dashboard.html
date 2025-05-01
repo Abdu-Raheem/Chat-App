@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <h2>Pending Requests</h2>
+        <div class="list-group mb-4">
+            {% for req in pending_requests %}
+                <div class="list-group-item">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">{{ req.subject }}</h5>
+                        <small class="text-warning">Pending</small>
+                    </div>
+                    <p class="mb-1">{{ req.description|truncatechars:100 }}</p>
+                    <small>Customer: {{ req.customer.username }}</small>
+                    
+                    <div class="mt-2">
+                        <a href="{% url 'update_request_status' req.id 'accepted' %}" class="btn btn-sm btn-success">Accept</a>
+                        <a href="{% url 'update_request_status' req.id 'rejected' %}" class="btn btn-sm btn-danger">Reject</a>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="alert alert-info">You have no pending requests.</div>
+            {% endfor %}
+        </div>
+        
+        <h2>Active Requests</h2>
+        <div class="list-group">
+            {% for req in active_requests %}
+                <div class="list-group-item">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">{{ req.subject }}</h5>
+                        <small class="text-success">Accepted</small>
+                    </div>
+                    <p class="mb-1">{{ req.description|truncatechars:100 }}</p>
+                    <small>Customer: {{ req.customer.username }}</small>
+                    
+                    <div class="mt-2">
+                        <a href="{% url 'chat' req.id %}" class="btn btn-sm btn-primary">Chat</a>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="alert alert-info">You have no active requests.</div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Your Profile</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Username:</strong> {{ user.username }}</p>
+                <p><strong>Email:</strong> {{ user.email }}</p>
+                <p><strong>Role:</strong> Agent</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

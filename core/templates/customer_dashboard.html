@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <h2>Your Service Requests</h2>
+        <a href="{% url 'create_service_request' %}" class="btn btn-primary mb-3">New Request</a>
+        
+        <div class="list-group">
+            {% for req in requests %}
+                <div class="list-group-item">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">{{ req.subject }}</h5>
+                        <small class="text-{% if req.status == 'accepted' %}success{% elif req.status == 'rejected' %}danger{% else %}warning{% endif %}">
+                            {{ req.get_status_display }}
+                        </small>
+                    </div>
+                    <p class="mb-1">{{ req.description|truncatechars:100 }}</p>
+                    <small>Agent: {{ req.agent.username }}</small>
+                    
+                    {% if req.status == 'accepted' %}
+                        <div class="mt-2">
+                            <a href="{% url 'chat' req.id %}" class="btn btn-sm btn-success">Chat</a>
+                        </div>
+                    {% endif %}
+                </div>
+            {% empty %}
+                <div class="alert alert-info">You have no service requests yet.</div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Your Profile</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Username:</strong> {{ user.username }}</p>
+                <p><strong>Email:</strong> {{ user.email }}</p>
+                <p><strong>Role:</strong> Customer</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block extra_css %}
+<style>
+    #chat-container {
+        height: 500px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 20px;
+        background-color: #f9f9f9;
+    }
+    #message-input {
+        border-radius: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Chat for Request: {{ service_request.subject }}</h2>
+    <p>With: {{ other_user.username }}</p>
+    
+    <div id="chat-container">
+        {% for message in messages %}
+            <div class="chat-message {% if message.sender == request.user %}sent{% else %}received{% endif %}">
+                <strong>{{ message.sender.username }}</strong>
+                <p>{{ message.message }}</p>
+                <small>{{ message.timestamp }}</small>
+            </div>
+        {% endfor %}
+    </div>
+    
+    <form id="chat-form" method="post">
+        {% csrf_token %}
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" id="message-input" name="message" placeholder="Type your message..." required>
+            <button class="btn btn-primary" type="submit">Send</button>
+        </div>
+    </form>
+</div>
+
+{% block extra_js %}
+<script>
+    // WebSocket connection
+    const chatSocket = new WebSocket(
+        'ws://' + window.location.host +
+        '/ws/chat/' + "{{ service_request.id }}" + '/'
+    );
+    
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        const chatContainer = document.getElementById('chat-container');
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('chat-message');
+        
+        if (data.sender === '{{ request.user.username }}') {
+            messageDiv.classList.add('sent');
+        } else {
+            messageDiv.classList.add('received');
+        }
+        
+        messageDiv.innerHTML = `
+        <strong>${data.sender}</strong>
+        <p>${data.message}</p>
+        <small>${formatTimestamp(data.timestamp)}</small>
+    `;
+
+    // Add this formatting function
+    function formatTimestamp(timestamp) {
+        const date = new Date(timestamp);
+        const options = { 
+            month: 'long', 
+            day: 'numeric', 
+            year: 'numeric',
+            hour: 'numeric', 
+            minute: '2-digit',
+            hour12: true 
+        };
+        return date.toLocaleString('en-US', options);
+    }
+        
+        chatContainer.appendChild(messageDiv);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    };
+    
+    chatSocket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+
+    // Function to hide alert messages
+    function hideSystemAlerts() {
+        const alerts = document.querySelectorAll('.alert.alert-');
+        alerts.forEach(alert => {
+            alert.style.display = 'none';
+        });
+    }
+
+    // Run initially to hide any existing alerts
+    document.addEventListener('DOMContentLoaded', function() {
+        hideSystemAlerts();
+    });
+    
+    // Handle form submission
+    document.querySelector('#chat-form').onsubmit = function(e) {
+        e.preventDefault();
+        const messageInput = document.querySelector('#message-input');
+        const message = messageInput.value;
+        
+        chatSocket.send(JSON.stringify({
+            'message': message,
+            'sender_id': "{{ request.user.id }}"
+        }));
+        
+        messageInput.value = '';
+    };
+    
+    // Scroll to bottom of chat
+    document.getElementById('chat-container').scrollTop = document.getElementById('chat-container').scrollHeight;
+</script>
+{% endblock %}
+{% endblock %}
