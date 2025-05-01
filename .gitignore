@@ -1,0 +1,63 @@
+# Python bytecode and cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+.virtualenv/
+
+# Django-related
+*.log
+*.pot
+*.pyc
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Media and static files
+/media/
+staticfiles/
+static/
+
+# Environment variables and secrets
+.env
+.env.*
+
+# VS Code & IDEs
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Migrations (optional, if you recreate them often in dev)
+**/migrations/*.py
+!**/migrations/__init__.py
+
+# Coverage and testing
+htmlcov/
+.coverage
+.tox/
+.nox/
+.cache/
+pytest_cache/
+.pytest_cache/
+
+# MyPy and other tools
+.mypy_cache/
+.dmypy.json
+.pyre/
+
+# Docker
+*.pid
+*.seed
+
+# Local build
+build/
+dist/
+*.egg-info/
